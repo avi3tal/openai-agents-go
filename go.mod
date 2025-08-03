@@ -21,11 +21,12 @@ require (
 	github.com/invopop/jsonschema v0.13.0
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/matteo-grella/dwarfreflect v0.1.0-alpha
-    github.com/mattn/go-sqlite3 v1.14.30
+	github.com/mattn/go-sqlite3 v1.14.30
 	github.com/modelcontextprotocol/go-sdk v0.2.0
 	github.com/openai/openai-go v1.12.0
 	github.com/playwright-community/playwright-go v0.5200.0
 	github.com/stretchr/testify v1.10.0
+	github.com/traceloop/go-openllmetry/traceloop-sdk v0.0.3
 	github.com/xeipuuv/gojsonschema v1.2.0
 )
 
@@ -54,7 +55,6 @@ require (
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/kluctl/go-embed-python v0.0.0-3.11.6-20231002-1 // indirect
 	github.com/kluctl/go-jinja2 v0.0.0-20240108142937-8839259d2537 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/mailru/easyjson v0.9.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
@@ -66,7 +66,6 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/traceloop/go-openllmetry/semconv-ai v0.0.0-20250405130248-6b2b4b41102b // indirect
-	github.com/traceloop/go-openllmetry/traceloop-sdk v0.0.3 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
