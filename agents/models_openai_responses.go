@@ -53,7 +53,11 @@ func (m OpenAIResponsesModel) GetResponse(
 	var response *responses.Response
 
 	err := tracing.ResponseSpan(
-		ctx, tracing.ResponseSpanParams{Disabled: params.Tracing.IsDisabled()},
+		ctx, tracing.ResponseSpanParams{
+			Disabled: params.Tracing.IsDisabled(),
+			Input:    params.Input,
+			Model:    string(m.Model),
+		},
 		func(ctx context.Context, spanResponse tracing.Span) (err error) {
 			defer func() {
 				if err != nil {
@@ -137,7 +141,11 @@ func (m OpenAIResponsesModel) StreamResponse(
 	yield ModelStreamResponseCallback,
 ) error {
 	return tracing.ResponseSpan(
-		ctx, tracing.ResponseSpanParams{Disabled: params.Tracing.IsDisabled()},
+		ctx, tracing.ResponseSpanParams{
+			Disabled: params.Tracing.IsDisabled(),
+			Input:    params.Input,
+			Model:    string(m.Model),
+		},
 		func(ctx context.Context, spanResponse tracing.Span) (err error) {
 			defer func() {
 				if err != nil {

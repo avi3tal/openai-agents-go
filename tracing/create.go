@@ -219,6 +219,10 @@ func GenerationSpan(ctx context.Context, params GenerationSpanParams, fn func(co
 type ResponseSpanParams struct {
 	// The OpenAI Response object.
 	Response *responses.Response
+	// Optional input messages for tracing processors that need prompt context
+	Input any
+	// The request model name for tracing processors
+	Model string
 	// The ID of the span. Optional. If not provided, we will generate an ID.
 	// We recommend using GenSpanID to generate a span ID, to guarantee that
 	// IDs are correctly formatted.
@@ -237,6 +241,8 @@ type ResponseSpanParams struct {
 func NewResponseSpan(ctx context.Context, params ResponseSpanParams) Span {
 	spanData := &ResponseSpanData{
 		Response: params.Response,
+		Input:    params.Input,
+		Model:    params.Model,
 	}
 	return GetTraceProvider().CreateSpan(
 		ctx,
