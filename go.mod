@@ -26,8 +26,6 @@ require (
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/matteo-grella/dwarfreflect v0.1.0-alpha
 	github.com/mattn/go-sqlite3 v1.14.30
-	github.com/jackc/pgx/v5 v5.7.1
-    github.com/mattn/go-sqlite3 v1.14.28
 	github.com/modelcontextprotocol/go-sdk v0.2.0
 	github.com/openai/openai-go/v2 v2.0.2
 	github.com/playwright-community/playwright-go v0.5200.0
@@ -44,6 +42,9 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/go-audio/riff v1.0.0 // indirect
+	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
+	github.com/go-git/go-billy/v5 v5.5.0 // indirect
+	github.com/go-git/go-git/v5 v5.11.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
