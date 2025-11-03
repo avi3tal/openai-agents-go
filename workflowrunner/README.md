@@ -85,6 +85,18 @@ sequenceDiagram
 builder := workflowrunner.NewDefaultBuilder()
 service := workflowrunner.NewRunnerService(builder)
 
+// Optional: register bespoke resources before executing any workflows.
+builder.
+    WithFunctionTool("get_weather", func(_ context.Context, decl workflowrunner.ToolDeclaration, _ workflowrunner.ToolFactoryEnv) (agents.Tool, error) {
+        return agents.NewFunctionTool("get_weather", "Fetches the latest weather", func(ctx context.Context, input struct{ City string ` + "`json:\"city\"`" + ` }) (string, error) {
+            return fmt.Sprintf("The weather in %s is sunny.", input.City), nil
+        }), nil
+    }).
+    WithLocalShellExecutor("default", myShellExecutor).
+    WithAgentToolExtractor("analysis_summary", summaryExtractor).
+    WithInputGuardrail("custom_keyword", newKeywordGuardrail).
+    WithRunHooks("audit", &AuditRunHooks{})
+
 req := workflowrunner.WorkflowRequest{
     Query: "List three fun facts about Mars.",
     Session: workflowrunner.SessionDeclaration{
@@ -102,13 +114,13 @@ req := workflowrunner.WorkflowRequest{
     Workflow: workflowrunner.WorkflowDeclaration{
         Name:          "simple_assistant",
         StartingAgent: "assistant",
-        Agents: []workflowrunner.AgentDeclaration{
-            {
-                Name:         "assistant",
-                Instructions: "You are an enthusiastic planetary science assistant.",
-                Model: &workflowrunner.ModelDeclaration{
-                    Model:       "gpt-4o-mini",
-                    Temperature: floatPtr(0.3),
+                Agents: []workflowrunner.AgentDeclaration{
+                {
+                    Name:         "assistant",
+                    Instructions: workflowrunner.InstructionText("You are an enthusiastic planetary science assistant."),
+                    Model: &workflowrunner.ModelDeclaration{
+                        Model:       "gpt-4o-mini",
+                            Temperature: floatPtr(0.3),
                 },
             },
         },
@@ -127,6 +139,10 @@ if summary.Error != nil {
     log.Printf("final output: %v", summary.Value.FinalOutput)
 }
 ```
+
+- `WithFunctionTool`/`WithComputerTool`/`WithLocalShellExecutor` attach Go-backed tool constructors that can be referenced from workflow JSON using `type: "function"`, `"computer"`, or `"local_shell"`.
+- `WithAgentToolExtractor`, `WithAgentHooks`, and `WithRunHooks` register reusable behaviors that agents and workflows can reference by name.
+- `WithInputGuardrail` and `WithOutputGuardrail` extend the guardrail registry beyond the built-in examples.
 
 - See `workflowrunner/examples/simple` and `workflowrunner/examples/complex` for
   runnable end-to-end demos.

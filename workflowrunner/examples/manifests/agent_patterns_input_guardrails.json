@@ -1,0 +1,37 @@
+{
+  "version": "v1",
+  "query": "Help me handle a frustrated customer about a flight delay.",
+  "session": {
+    "session_id": "example-input-guardrails",
+    "history_size": 20,
+    "max_turns": 12,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "input_guardrail_demo",
+    "starting_agent": "support_agent",
+    "agents": [
+      {
+        "name": "support_agent",
+        "instructions": "You are a customer support agent who provides calm, policy-aligned guidance.",
+        "model": {
+          "model": "gpt-4.1-nano"
+        },
+        "input_guardrails": [
+          {
+            "name": "math_homework_input"
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "example_source": "examples/agent_patterns/input_guardrails"
+  }
+}

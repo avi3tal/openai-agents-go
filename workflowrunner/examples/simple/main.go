@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/nlpodyssey/openai-agents-go/workflowrunner"
+	"github.com/openai/openai-go/v2/shared"
 )
 
 func main() {
@@ -32,9 +33,9 @@ func main() {
 			Agents: []workflowrunner.AgentDeclaration{
 				{
 					Name:         "assistant",
-					Instructions: "You are an enthusiastic planetary science assistant.",
+					Instructions: workflowrunner.InstructionText("You are an enthusiastic planetary science assistant."),
 					Model: &workflowrunner.ModelDeclaration{
-						Model:       "gpt-4o-mini",
+						Model:       shared.ChatModelGPT5ChatLatest,
 						Temperature: floatPtr(0.3),
 					},
 				},

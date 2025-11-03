@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/nlpodyssey/openai-agents-go/workflowrunner"
+	"github.com/openai/openai-go/v2/shared"
 )
 
 // This example demonstrates a richer workflow declaration with handoffs, tools,
@@ -35,9 +36,9 @@ func main() {
 			Agents: []workflowrunner.AgentDeclaration{
 				{
 					Name:         "researcher",
-					Instructions: "You are a research specialist. Always call the web_search tool first, gather the most recent reusable rocket breakthroughs, and return 3-4 bullet points with citations.",
+					Instructions: workflowrunner.InstructionText("You are a research specialist. Always call the web_search tool first, gather the most recent reusable rocket breakthroughs, and return 3-4 bullet points with citations."),
 					Model: &workflowrunner.ModelDeclaration{
-						Model:       "gpt-4o-mini",
+						Model:       shared.ChatModelGPT5ChatLatest,
 						Temperature: floatPtr(0.1),
 					},
 					Tools: []workflowrunner.ToolDeclaration{
@@ -55,9 +56,9 @@ func main() {
 				},
 				{
 					Name:         "writer",
-					Instructions: "You receive research bullet points and craft a concise two-paragraph executive summary that references those findings.",
+					Instructions: workflowrunner.InstructionText("You receive research bullet points and craft a concise two-paragraph executive summary that references those findings."),
 					Model: &workflowrunner.ModelDeclaration{
-						Model:       "gpt-4o",
+						Model:       shared.ChatModelGPT5ChatLatest,
 						Temperature: floatPtr(0.3),
 					},
 					OutputGuardrails: []workflowrunner.GuardrailDeclaration{
@@ -67,9 +68,9 @@ func main() {
 				},
 				{
 					Name:         "supervisor",
-					Instructions: "You orchestrate reusable-rocket research. First, call the `research_insights` tool to gather bullet points. Then call the `exec_summary` tool to produce the final executive summary. After both tools run, deliver the writer's summary to the user.",
+					Instructions: workflowrunner.InstructionText("You orchestrate reusable-rocket research. First, call the `research_insights` tool to gather bullet points. Then call the `exec_summary` tool to produce the final executive summary. After both tools run, deliver the writer's summary to the user."),
 					Model: &workflowrunner.ModelDeclaration{
-						Model:       "gpt-4o-mini",
+						Model:       shared.ChatModelGPT5ChatLatest,
 						Temperature: floatPtr(0.2),
 					},
 					AgentTools: []workflowrunner.AgentToolReference{

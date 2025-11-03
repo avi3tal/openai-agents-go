@@ -1,0 +1,40 @@
+{
+  "version": "v1",
+  "query": "What is 81 multiplied by 17?",
+  "session": {
+    "session_id": "example-basic-reasoning-usage",
+    "history_size": 12,
+    "max_turns": 12,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout_verbose"
+  },
+  "workflow": {
+    "name": "reasoning_usage_demo",
+    "starting_agent": "reasoner",
+    "agents": [
+      {
+        "name": "reasoner",
+        "instructions": "Solve the math problem step by step and share your reasoning summary.",
+        "model": {
+          "model": "gpt-5-mini",
+          "reasoning": {
+            "effort": "medium",
+            "summary": "auto"
+          },
+          "verbosity": "medium"
+        }
+      }
+    ],
+    "metadata": {
+      "source": "workflowrunner/examples/manifests/basic_reasoning_usage.json"
+    }
+  },
+  "metadata": {
+    "example_source": "examples/basic/reasoning_usage"
+  }
+}

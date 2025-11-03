@@ -1,0 +1,41 @@
+{
+  "version": "v1",
+  "query": "What's the weather in Tokyo?",
+  "session": {
+    "session_id": "example-basic-tools",
+    "history_size": 10,
+    "max_turns": 10,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "function_tool_demo",
+    "starting_agent": "weather_assistant",
+    "agents": [
+      {
+        "name": "weather_assistant",
+        "instructions": "You are a helpful agent.",
+        "model": {
+          "model": "gpt-4.1-nano"
+        },
+        "tools": [
+          {
+            "type": "function",
+            "function_ref": "get_weather",
+            "config": {
+              "description": "Get the current weather information for a specified city."
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "example_source": "examples/basic/tools"
+  }
+}

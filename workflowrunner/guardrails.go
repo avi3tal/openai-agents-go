@@ -9,30 +9,31 @@ import (
 	"github.com/nlpodyssey/openai-agents-go/agents"
 )
 
-type inputGuardrailBuilder func(context.Context, GuardrailDeclaration) (agents.InputGuardrail, error)
-type outputGuardrailBuilder func(context.Context, GuardrailDeclaration) (agents.OutputGuardrail, error)
-
-var inputGuardrailRegistry = map[string]inputGuardrailBuilder{
+var defaultInputGuardrailFactories = map[string]InputGuardrailFactory{
 	"math_homework_input":   newMathHomeworkInputGuardrail,
 	"basic_profanity_input": newProfanityInputGuardrail,
 }
 
-var outputGuardrailRegistry = map[string]outputGuardrailBuilder{
+var defaultOutputGuardrailFactories = map[string]OutputGuardrailFactory{
 	"phone_number_output":    newPhoneNumberOutputGuardrail,
 	"basic_profanity_output": newProfanityOutputGuardrail,
 }
 
-func buildInputGuardrails(ctx context.Context, decls []GuardrailDeclaration) ([]agents.InputGuardrail, error) {
+func (b *Builder) buildInputGuardrails(ctx context.Context, decls []GuardrailDeclaration) ([]agents.InputGuardrail, error) {
 	if len(decls) == 0 {
 		return nil, nil
 	}
 	guardrails := make([]agents.InputGuardrail, 0, len(decls))
 	for _, decl := range decls {
-		builder, ok := inputGuardrailRegistry[strings.ToLower(decl.Name)]
+		key := strings.ToLower(strings.TrimSpace(decl.Name))
+		factory, ok := b.InputGuardrailFactories[key]
+		if !ok {
+			factory, ok = defaultInputGuardrailFactories[key]
+		}
 		if !ok {
 			return nil, fmt.Errorf("unknown input guardrail %q", decl.Name)
 		}
-		gr, err := builder(ctx, decl)
+		gr, err := factory(ctx, decl)
 		if err != nil {
 			return nil, fmt.Errorf("build input guardrail %q: %w", decl.Name, err)
 		}
@@ -41,17 +42,21 @@ func buildInputGuardrails(ctx context.Context, decls []GuardrailDeclaration) ([]
 	return guardrails, nil
 }
 
-func buildOutputGuardrails(ctx context.Context, decls []GuardrailDeclaration) ([]agents.OutputGuardrail, error) {
+func (b *Builder) buildOutputGuardrails(ctx context.Context, decls []GuardrailDeclaration) ([]agents.OutputGuardrail, error) {
 	if len(decls) == 0 {
 		return nil, nil
 	}
 	guardrails := make([]agents.OutputGuardrail, 0, len(decls))
 	for _, decl := range decls {
-		builder, ok := outputGuardrailRegistry[strings.ToLower(decl.Name)]
+		key := strings.ToLower(strings.TrimSpace(decl.Name))
+		factory, ok := b.OutputGuardrailFactories[key]
+		if !ok {
+			factory, ok = defaultOutputGuardrailFactories[key]
+		}
 		if !ok {
 			return nil, fmt.Errorf("unknown output guardrail %q", decl.Name)
 		}
-		gr, err := builder(ctx, decl)
+		gr, err := factory(ctx, decl)
 		if err != nil {
 			return nil, fmt.Errorf("build output guardrail %q: %w", decl.Name, err)
 		}

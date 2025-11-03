@@ -1,0 +1,82 @@
+{
+  "version": "v1",
+  "query": "Translate the sentence 'Good morning team' into Spanish, French, and Italian.",
+  "session": {
+    "session_id": "example-agents-as-tools",
+    "history_size": 20,
+    "max_turns": 20,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "agents_as_tools_translation",
+    "starting_agent": "orchestrator",
+    "agents": [
+      {
+        "name": "spanish_agent",
+        "instructions": "Translate the provided English text to Spanish.",
+        "model": {
+          "model": "gpt-4o-mini"
+        }
+      },
+      {
+        "name": "french_agent",
+        "instructions": "Translate the provided English text to French.",
+        "model": {
+          "model": "gpt-4o-mini"
+        }
+      },
+      {
+        "name": "italian_agent",
+        "instructions": "Translate the provided English text to Italian.",
+        "model": {
+          "model": "gpt-4o-mini"
+        }
+      },
+      {
+        "name": "synthesizer_agent",
+        "instructions": "Combine the provided translations into a single response, correcting any mistakes.",
+        "model": {
+          "model": "gpt-4o-mini"
+        }
+      },
+      {
+        "name": "orchestrator",
+        "instructions": "You coordinate translation agents. For each requested language, call the matching translation tool. After gathering translations, call the synthesizer tool to present a final reply. Do not translate content yourself.",
+        "model": {
+          "model": "gpt-4o-mini"
+        },
+        "agent_tools": [
+          {
+            "agent_name": "spanish_agent",
+            "tool_name": "translate_to_spanish",
+            "description": "Translate text to Spanish."
+          },
+          {
+            "agent_name": "french_agent",
+            "tool_name": "translate_to_french",
+            "description": "Translate text to French."
+          },
+          {
+            "agent_name": "italian_agent",
+            "tool_name": "translate_to_italian",
+            "description": "Translate text to Italian."
+          },
+          {
+            "agent_name": "synthesizer_agent",
+            "tool_name": "combine_translations",
+            "description": "Combine translations into a polished final response."
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "example_source": "examples/agent_patterns/agents_as_tools"
+  }
+}

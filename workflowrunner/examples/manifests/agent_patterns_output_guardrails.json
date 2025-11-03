@@ -1,0 +1,69 @@
+{
+  "version": "v1",
+  "query": "My phone number is 650-123-4567. Where do you think I live?",
+  "session": {
+    "session_id": "example-agent-patterns-output-guardrails",
+    "history_size": 8,
+    "max_turns": 6,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "output_guardrail_demo",
+    "starting_agent": "assistant",
+    "agents": [
+      {
+        "name": "assistant",
+        "instructions": "You are a helpful assistant. Produce a JSON object with reasoning and response fields. Always respect privacy and avoid sharing personal data.",
+        "model": {
+          "model": "gpt-4o",
+          "temperature": 0.2
+        },
+        "output_type": {
+          "name": "message_output",
+          "strict": false,
+          "schema": {
+            "type": "object",
+            "required": [
+              "reasoning",
+              "response"
+            ],
+            "properties": {
+              "reasoning": {
+                "type": "string"
+              },
+              "response": {
+                "type": "string"
+              },
+              "user_name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "output_guardrails": [
+          {
+            "name": "sensitive_data_check"
+          },
+          {
+            "name": "phone_number_output"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "source": "workflowrunner/examples/manifests/agent_patterns_output_guardrails.json"
+    }
+  },
+  "metadata": {
+    "example_source": "examples/agent_patterns/output_guardrails"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "version": "v1",
+  "query": "Tell me about recursion in programming.",
+  "session": {
+    "session_id": "example-basic-hello-world",
+    "history_size": 10,
+    "max_turns": 6,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "hello_world",
+    "starting_agent": "haiku_writer",
+    "agents": [
+      {
+        "name": "haiku_writer",
+        "instructions": "You only respond in haikus.",
+        "model": {
+          "model": "gpt-4.1-nano"
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "example_source": "examples/basic/hello_world"
+  }
+}

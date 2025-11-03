@@ -1,0 +1,42 @@
+{
+  "version": "v1",
+  "query": "Write me a short greeting for our space crew.",
+  "context": {
+    "style": "pirate bard",
+    "signature": "Arrr"
+  },
+  "session": {
+    "session_id": "example-basic-dynamic-system-prompt",
+    "history_size": 10,
+    "max_turns": 6,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "dynamic_system_prompt",
+    "starting_agent": "storyteller",
+    "agents": [
+      {
+        "name": "storyteller",
+        "instructions": {
+          "template": "You are a poetic assistant who speaks like a {{ .context.style }}. End every response with the phrase \"{{ .context.signature }}\" and reference the user's request: {{ .request.query }}."
+        },
+        "model": {
+          "model": "gpt-4.1-nano",
+          "temperature": 0.7
+        }
+      }
+    ],
+    "metadata": {
+      "source": "workflowrunner/examples/manifests/basic_dynamic_system_prompt.json"
+    }
+  },
+  "metadata": {
+    "example_source": "examples/basic/dynamic_system_prompt"
+  }
+}

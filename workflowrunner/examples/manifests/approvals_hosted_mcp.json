@@ -1,0 +1,46 @@
+{
+  "version": "v1",
+  "query": "Check if any sensitive files exist matching 'secret' but ask me for approval before opening anything.",
+  "session": {
+    "session_id": "example-approvals-hosted-mcp",
+    "history_size": 10,
+    "max_turns": 8,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "hosted_mcp_approval",
+    "starting_agent": "investigator",
+    "agents": [
+      {
+        "name": "investigator",
+        "instructions": "You investigate potential security issues. Use the mock_sensitive_files tool to check for matching files, but you must request user approval before revealing anything. The tool returns a JSON object with `approved` (bool) and `matches` (list of strings); if approval is denied, tell the user you were blocked.",
+        "model": {
+          "model": "gpt-4o-mini"
+        },
+        "tools": [
+          {
+            "type": "function",
+            "function_ref": "mock_sensitive_files",
+            "config": {
+              "description": "Scan a predefined set of sensitive files. Requires user approval before returning any matches.",
+              "files": [
+                "vault/secret_plans.txt",
+                "logs/access.log",
+                "notes/secret_thoughts.md"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "example_source": "workflowrunner/examples/manifests"
+  }
+}

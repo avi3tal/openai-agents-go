@@ -31,6 +31,8 @@ type ApprovalRequestState struct {
 type WorkflowExecutionState struct {
 	SessionID        string                 `json:"session_id"`
 	WorkflowName     string                 `json:"workflow_name"`
+	RunID            string                 `json:"run_id"`
+	ResumeToken      string                 `json:"resume_token"`
 	Status           ExecutionStatus        `json:"status"`
 	LastAgent        string                 `json:"last_agent"`
 	LastResponseID   string                 `json:"last_response_id"`
@@ -38,6 +40,8 @@ type WorkflowExecutionState struct {
 	LastError        string                 `json:"last_error"`
 	PendingApprovals []ApprovalRequestState `json:"pending_approvals"`
 	FinalOutput      any                    `json:"final_output,omitempty"`
+	StartedAt        time.Time              `json:"started_at"`
+	EndedAt          *time.Time             `json:"ended_at,omitempty"`
 	UpdatedAt        time.Time              `json:"updated_at"`
 }
 
@@ -66,6 +70,10 @@ func (s *InMemoryExecutionStateStore) Save(_ context.Context, state WorkflowExec
 	if len(state.PendingApprovals) > 0 {
 		copyState.PendingApprovals = append([]ApprovalRequestState(nil), state.PendingApprovals...)
 	}
+	if state.EndedAt != nil {
+		t := *state.EndedAt
+		copyState.EndedAt = &t
+	}
 	s.data[state.SessionID] = copyState
 	return nil
 }
@@ -79,6 +87,10 @@ func (s *InMemoryExecutionStateStore) Load(_ context.Context, sessionID string) 
 	}
 	if len(state.PendingApprovals) > 0 {
 		state.PendingApprovals = append([]ApprovalRequestState(nil), state.PendingApprovals...)
+	}
+	if state.EndedAt != nil {
+		t := *state.EndedAt
+		state.EndedAt = &t
 	}
 	return state, true, nil
 }
@@ -106,12 +118,16 @@ func newExecutionStateTracker(store ExecutionStateStore, sessionID, workflowName
 	}
 }
 
-func (t *executionStateTracker) OnRunStarted(ctx context.Context, query string) error {
+func (t *executionStateTracker) OnRunStarted(ctx context.Context, runID, resumeToken, query string, startedAt time.Time) error {
 	t.state.Status = ExecutionStatusRunning
+	t.state.RunID = runID
+	t.state.ResumeToken = resumeToken
 	t.state.LastQuery = query
 	t.state.PendingApprovals = nil
 	t.state.LastError = ""
 	t.state.FinalOutput = nil
+	t.state.StartedAt = startedAt
+	t.state.EndedAt = nil
 	t.state.UpdatedAt = time.Now().UTC()
 	return t.store.Save(ctx, t.state)
 }
@@ -176,6 +192,8 @@ func (t *executionStateTracker) OnRunCompleted(ctx context.Context, lastResponse
 	t.state.FinalOutput = finalOutput
 	t.state.PendingApprovals = nil
 	t.state.LastError = ""
+	now := time.Now().UTC()
+	t.state.EndedAt = &now
 	t.state.UpdatedAt = time.Now().UTC()
 	return t.store.Save(ctx, t.state)
 }
@@ -187,8 +205,11 @@ func (t *executionStateTracker) OnRunFailed(ctx context.Context, err error) erro
 	t.state.LastError = err.Error()
 	if len(t.state.PendingApprovals) > 0 {
 		t.state.Status = ExecutionStatusWaitingApproval
+		t.state.EndedAt = nil
 	} else {
 		t.state.Status = ExecutionStatusFailed
+		now := time.Now().UTC()
+		t.state.EndedAt = &now
 	}
 	t.state.UpdatedAt = time.Now().UTC()
 	return t.store.Save(ctx, t.state)

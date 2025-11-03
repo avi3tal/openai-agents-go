@@ -109,6 +109,9 @@ func newHostedMCPTool(_ context.Context, decl ToolDeclaration, env ToolFactoryEn
 	if v, ok := getString(decl.Config, "require_approval"); ok && v != "" {
 		requireApproval = v
 	}
+	if decl.ApprovalFlow != nil && strings.TrimSpace(decl.ApprovalFlow.Require) != "" {
+		requireApproval = decl.ApprovalFlow.Require
+	}
 	return agents.HostedMCPTool{
 		ToolConfig: responses.ToolMcpParam{
 			ServerLabel: label,
@@ -136,16 +139,61 @@ func newJSONMapOutputType(_ context.Context, decl OutputTypeDeclaration) (agents
 }
 
 // NewSQLiteSessionFactory stores sessions on-disk inside baseDir (created if needed).
-func NewSQLiteSessionFactory(baseDir string) SessionFactory {
+func NewSQLiteSessionFactory(defaultBaseDir string) SessionFactory {
 	return func(ctx context.Context, decl SessionDeclaration) (memory.Session, error) {
-		if err := os.MkdirAll(baseDir, 0o755); err != nil {
-			return nil, fmt.Errorf("create session dir: %w", err)
+		baseDir := defaultBaseDir
+		if name, ok := getString(decl.StoreConfig, "base_dir"); ok && strings.TrimSpace(name) != "" {
+			baseDir = name
 		}
+		if baseDir != "" {
+			if err := os.MkdirAll(baseDir, 0o755); err != nil {
+				return nil, fmt.Errorf("create session dir: %w", err)
+			}
+		}
+
+		if dsn, ok := getString(decl.StoreConfig, "dsn"); ok && strings.TrimSpace(dsn) != "" {
+			return memory.NewSQLiteSession(ctx, memory.SQLiteSessionParams{
+				SessionID:        decl.SessionID,
+				DBDataSourceName: dsn,
+			})
+		}
+		if path, ok := getString(decl.StoreConfig, "db_path"); ok && strings.TrimSpace(path) != "" {
+			return memory.NewSQLiteSession(ctx, memory.SQLiteSessionParams{
+				SessionID:        decl.SessionID,
+				DBDataSourceName: path,
+			})
+		}
+
 		dbPath := filepath.Join(baseDir, fmt.Sprintf("%s.db", sanitizeFileName(decl.SessionID)))
 		return memory.NewSQLiteSession(ctx, memory.SQLiteSessionParams{
 			SessionID:        decl.SessionID,
 			DBDataSourceName: dbPath,
 		})
+	}
+}
+
+// NewPostgresSessionFactory creates PostgreSQL-backed sessions. The defaultConnString is used
+// when the declaration does not provide a connection string in store_config.connection_string.
+func NewPostgresSessionFactory(defaultConnString string) SessionFactory {
+	return func(ctx context.Context, decl SessionDeclaration) (memory.Session, error) {
+		connString := defaultConnString
+		if c, ok := getString(decl.StoreConfig, "connection_string"); ok && strings.TrimSpace(c) != "" {
+			connString = c
+		}
+		if connString == "" {
+			return nil, errors.New("postgres persistent_store requires store_config.connection_string")
+		}
+		params := memory.PgSessionParams{
+			SessionID:        decl.SessionID,
+			ConnectionString: connString,
+		}
+		if table, ok := getString(decl.StoreConfig, "session_table"); ok && strings.TrimSpace(table) != "" {
+			params.SessionTable = table
+		}
+		if table, ok := getString(decl.StoreConfig, "messages_table"); ok && strings.TrimSpace(table) != "" {
+			params.MessagesTable = table
+		}
+		return memory.NewPgSession(ctx, params)
 	}
 }
 
