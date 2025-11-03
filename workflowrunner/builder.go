@@ -197,13 +197,18 @@ func (b *Builder) Build(ctx context.Context, req WorkflowRequest) (*BuildResult,
 		return nil, err
 	}
 
-	sessionFactory, err := b.resolveSessionFactory(req.Session)
-	if err != nil {
-		return nil, err
-	}
-	session, err := sessionFactory(ctx, req.Session)
-	if err != nil {
-		return nil, fmt.Errorf("create session: %w", err)
+	var session memory.Session
+	useSession := len(req.Inputs) == 0
+	if useSession {
+		sessionFactory, err := b.resolveSessionFactory(req.Session)
+		if err != nil {
+			return nil, err
+		}
+		acquiredSession, err := sessionFactory(ctx, req.Session)
+		if err != nil {
+			return nil, fmt.Errorf("create session: %w", err)
+		}
+		session = acquiredSession
 	}
 
 	agentMap := make(map[string]*agents.Agent, len(req.Workflow.Agents))
@@ -350,8 +355,10 @@ func (b *Builder) Build(ctx context.Context, req WorkflowRequest) (*BuildResult,
 	} else if runHooks != nil {
 		runConfig.Hooks = runHooks
 	}
-	runConfig.Session = session
-	if req.Session.HistorySize > 0 {
+	if session != nil {
+		runConfig.Session = session
+	}
+	if session != nil && req.Session.HistorySize > 0 {
 		runConfig.LimitMemory = req.Session.HistorySize
 	}
 	runConfig.TracingDisabled = false

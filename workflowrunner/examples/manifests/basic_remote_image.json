@@ -1,0 +1,55 @@
+{
+  "version": "v1",
+  "query": "What do you see in this image?",
+  "inputs": [
+    {
+      "type": "message",
+      "role": "user",
+      "content": [
+        {
+          "type": "input_image",
+          "image_url": "https://upload.wikimedia.org/wikipedia/commons/0/0c/GoldenGateBridge-001.jpg",
+          "detail": "auto"
+        }
+      ]
+    },
+    {
+      "type": "message",
+      "role": "user",
+      "content": {
+        "text": "What do you see in this image?"
+      }
+    }
+  ],
+  "session": {
+    "session_id": "example-basic-remote-image",
+    "history_size": 5,
+    "max_turns": 4,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "remote_image_captioner",
+    "starting_agent": "vision_model",
+    "agents": [
+      {
+        "name": "vision_model",
+        "instructions": "Describe the provided image succinctly and mention notable landmarks.",
+        "model": {
+          "model": "gpt-4.1-nano"
+        }
+      }
+    ],
+    "metadata": {
+      "source": "workflowrunner/examples/manifests/basic_remote_image.json"
+    }
+  },
+  "metadata": {
+    "example_source": "examples/basic/remote_image"
+  }
+}
