@@ -1,0 +1,43 @@
+{
+  "version": "v1",
+  "query": "Search the web for 'local sports news' and give me one interesting update in a sentence.",
+  "session": {
+    "session_id": "example-tools-web-search",
+    "history_size": 15,
+    "max_turns": 10,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "web_search_demo",
+    "starting_agent": "web_searcher",
+    "agents": [
+      {
+        "name": "web_searcher",
+        "instructions": "You are a helpful agent.",
+        "model": {
+          "model": "gpt-4o-mini"
+        },
+        "tools": [
+          {
+            "type": "web_search",
+            "config": {
+              "user_location": {
+                "city": "New York",
+                "type": "approximate"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "example_source": "examples/tools/web_search"
+  }
+}

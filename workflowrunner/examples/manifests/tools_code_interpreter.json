@@ -1,0 +1,41 @@
+{
+  "version": "v1",
+  "query": "What is the square root of 273 * 312821 plus 1782?",
+  "session": {
+    "session_id": "example-tools-code-interpreter",
+    "history_size": 10,
+    "max_turns": 10,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "code_interpreter_demo",
+    "starting_agent": "math_coder",
+    "agents": [
+      {
+        "name": "math_coder",
+        "instructions": "You love doing math. Use the code interpreter tool for calculations and explain the reasoning briefly.",
+        "model": {
+          "model": "gpt-4.1-nano",
+          "temperature": 0.3
+        },
+        "tools": [
+          {
+            "type": "code_interpreter"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "source": "workflowrunner/examples/manifests/tools_code_interpreter.json"
+    }
+  },
+  "metadata": {
+    "example_source": "examples/tools/code_interpreter"
+  }
+}

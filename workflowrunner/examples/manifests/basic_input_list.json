@@ -1,0 +1,53 @@
+{
+  "version": "v1",
+  "query": "What's the time?",
+  "inputs": [
+    {
+      "type": "message",
+      "role": "system",
+      "content": "You are a helpful assistant that always formats times clearly."
+    },
+    {
+      "type": "message",
+      "role": "developer",
+      "content": "Current time is 4:09 PM."
+    },
+    {
+      "type": "message",
+      "role": "user",
+      "content": "What's the time?"
+    }
+  ],
+  "session": {
+    "session_id": "example-basic-input-list",
+    "history_size": 6,
+    "max_turns": 4,
+    "credentials": {
+      "user_id": "demo-user",
+      "account_id": "demo-account"
+    }
+  },
+  "callback": {
+    "mode": "stdout"
+  },
+  "workflow": {
+    "name": "input_list_demo",
+    "starting_agent": "clock_assistant",
+    "agents": [
+      {
+        "name": "clock_assistant",
+        "instructions": "Answer with the precise time from the developer note and include one sentence of friendly context.",
+        "model": {
+          "model": "gpt-4o",
+          "temperature": 0.2
+        }
+      }
+    ],
+    "metadata": {
+      "source": "workflowrunner/examples/manifests/basic_input_list.json"
+    }
+  },
+  "metadata": {
+    "example_source": "examples/basic/input_list"
+  }
+}
