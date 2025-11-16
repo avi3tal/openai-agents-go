@@ -241,9 +241,12 @@ func (b *Builder) Build(ctx context.Context, req WorkflowRequest) (*BuildResult,
 			agent.WithPrompt(agents.Prompt{ID: decl.PromptID})
 		}
 		if decl.Model != nil {
-			if err := applyModelDeclaration(agent, *decl.Model); err != nil {
+			modelSettings, err := applyModelDeclaration(*decl.Model)
+			if err != nil {
 				return nil, fmt.Errorf("agent %q model: %w", decl.Name, err)
 			}
+			agent.WithModel(decl.Model.Model)
+			agent.WithModelSettings(*modelSettings)
 		}
 		if decl.OutputType != nil {
 			outputType, err := b.buildOutputType(ctx, *decl.OutputType)
@@ -284,6 +287,7 @@ func (b *Builder) Build(ctx context.Context, req WorkflowRequest) (*BuildResult,
 	}
 
 	// Second pass: attach handoffs and tools.
+	// has to be done after all agents are created.
 	for _, item := range pending {
 		agent := item.agent
 		if len(item.decl.Handoffs) > 0 {
@@ -377,14 +381,13 @@ func (b *Builder) Build(ctx context.Context, req WorkflowRequest) (*BuildResult,
 	return builderResult, nil
 }
 
-func applyModelDeclaration(agent *agents.Agent, decl ModelDeclaration) error {
+func applyModelDeclaration(decl ModelDeclaration) (*modelsettings.ModelSettings, error) {
 	if strings.TrimSpace(decl.Provider) != "" && !strings.EqualFold(decl.Provider, "openai") {
-		return fmt.Errorf("provider %q not supported (only openai is available in this build)", decl.Provider)
+		return nil, fmt.Errorf("provider %q not supported (only openai is available in this build)", decl.Provider)
 	}
 	if strings.TrimSpace(decl.Model) == "" {
-		return errors.New("model name cannot be empty")
+		return nil, errors.New("model name cannot be empty")
 	}
-	agent.WithModel(decl.Model)
 	settings := modelsettings.ModelSettings{}
 	if decl.Temperature != nil {
 		settings.Temperature = param.NewOpt(*decl.Temperature)
@@ -404,7 +407,7 @@ func applyModelDeclaration(agent *agents.Agent, decl ModelDeclaration) error {
 		case "high":
 			settings.Verbosity = param.NewOpt(modelsettings.VerbosityHigh)
 		default:
-			return fmt.Errorf("unsupported verbosity %q", decl.Verbosity)
+			return nil, fmt.Errorf("unsupported verbosity %q", decl.Verbosity)
 		}
 	}
 	if decl.Metadata != nil {
@@ -422,8 +425,7 @@ func applyModelDeclaration(agent *agents.Agent, decl ModelDeclaration) error {
 	if strings.TrimSpace(decl.ToolChoice) != "" {
 		settings.ToolChoice = modelsettings.ToolChoiceString(decl.ToolChoice)
 	}
-	agent.WithModelSettings(settings)
-	return nil
+	return &settings, nil
 }
 
 func applyToolUseBehavior(agent *agents.Agent, decl *ToolUseBehaviorDeclaration) error {

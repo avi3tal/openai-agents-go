@@ -112,15 +112,22 @@ func newHostedMCPTool(_ context.Context, decl ToolDeclaration, env ToolFactoryEn
 	if decl.ApprovalFlow != nil && strings.TrimSpace(decl.ApprovalFlow.Require) != "" {
 		requireApproval = decl.ApprovalFlow.Require
 	}
-	return agents.HostedMCPTool{
-		ToolConfig: responses.ToolMcpParam{
-			ServerLabel: label,
-			ServerURL:   param.NewOpt(url),
-			RequireApproval: responses.ToolMcpRequireApprovalUnionParam{
-				OfMcpToolApprovalSetting: param.NewOpt(requireApproval),
-			},
-			Type: constant.ValueOf[constant.Mcp](),
+	toolConfig := responses.ToolMcpParam{
+		ServerLabel: label,
+		ServerURL:   param.NewOpt(url),
+		RequireApproval: responses.ToolMcpRequireApprovalUnionParam{
+			OfMcpToolApprovalSetting: param.NewOpt(requireApproval),
 		},
+		Type: constant.ValueOf[constant.Mcp](),
+	}
+	if headers, ok := getStringMap(decl.Config, "headers"); ok && len(headers) > 0 {
+		toolConfig.Headers = headers
+	}
+	if auth, ok := getString(decl.Config, "authorization"); ok && strings.TrimSpace(auth) != "" {
+		toolConfig.Authorization = param.NewOpt(auth)
+	}
+	return agents.HostedMCPTool{
+		ToolConfig: toolConfig,
 	}, nil
 }
 
@@ -342,6 +349,28 @@ func getSlice[T any](source map[string]any, key string) ([]T, bool) {
 			} else {
 				return nil, false
 			}
+		}
+	}
+	return result, true
+}
+
+func getStringMap(source map[string]any, key string) (map[string]string, bool) {
+	m, ok := getMap(source, key)
+	if !ok {
+		return nil, false
+	}
+	result := make(map[string]string, len(m))
+	for k, v := range m {
+		if v == nil {
+			continue
+		}
+		switch typed := v.(type) {
+		case string:
+			result[k] = typed
+		case fmt.Stringer:
+			result[k] = typed.String()
+		default:
+			result[k] = fmt.Sprintf("%v", v)
 		}
 	}
 	return result, true
